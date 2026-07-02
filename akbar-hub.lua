@@ -15,7 +15,6 @@ end)
 local TARGET_PART = "HumanoidRootPart" 
 local CONFIG_HITBOX_SIZE = 4           
 local CONFIG_HITBOX_TRANSPARENCY = 0.7 
-
 local AIMBOT_KEY = Enum.UserInputType.MouseButton2 
 local AIMBOT_SMOOTHNESS = 0.25                     
 local AIMBOT_FOV_RADIUS = 150                      
@@ -37,9 +36,16 @@ local CharacterConnections = {}
 local PlayerAddedConnection
 local HitboxConnection
 
-local OrionLib = loadstring(game:HttpGet("https://sandbox.orioncloud.tech/api/source", true))()
-local Window = OrionLib:MakeWindow({Name = "Akbar Hub", HidePremium = true, SaveConfig = false, IntroText = "Loading Akbar Hub..."})
+--// LOAD RAYFIELD UI LIBRARY (Modern & Super Smooth)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+   Name = "Akbar Hub",
+   LoadingTitle = "Akbar Hub Preview",
+   LoadingSubtitle = "by Akbar",
+   ConfigurationSaving = { Enabled = false }
+})
 
+--// FOV DRAWING
 local FovCircle = Drawing.new("Circle")
 FovCircle.Visible = false
 FovCircle.Thickness = 1
@@ -48,6 +54,7 @@ FovCircle.Radius = AIMBOT_FOV_RADIUS
 FovCircle.Color = Color3.fromRGB(255, 255, 255)
 FovCircle.Filled = false
 
+--// FUNCTIONS
 local function createHighlight(character)
     if character:FindFirstChild("AdminHighlight") then return end
     local highlight = Instance.new("Highlight")
@@ -130,7 +137,6 @@ local function getClosestPlayerToCursor()
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 and player.Character:FindFirstChild(TARGET_PART) then
             if TeamCheckEnabled and LocalPlayer.Team ~= nil and player.Team == LocalPlayer.Team then continue end
-            
             local pos, onScreen = Camera:WorldToViewportPoint(player.Character[TARGET_PART].Position)
             if onScreen then
                 local mousePos = UserInputService:GetMouseLocation()
@@ -164,16 +170,21 @@ local function spoofAvatar()
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-
     pcall(function()
         local desc = Players:GetHumanoidDescriptionFromUserId(TARGET_USER_ID)
-        if desc then
-            hum:ApplyDescription(desc)
-            OrionLib:MakeNotification({Name = "Wardrobe", Content = "Avatar successfully changed!", Time = 3})
+        if desc then 
+            hum:ApplyDescription(desc) 
+            Rayfield:Notify({
+               Name = "Wardrobe Success",
+               Content = "Avatar changed successfully!",
+               Duration = 3,
+               Image = 4483345998,
+            })
         end
     end)
 end
 
+--// LOOPS & INPUTS
 HitboxConnection = RunService.RenderStepped:Connect(function()
     updateHitboxes()
     handleAimbot()
@@ -188,60 +199,60 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == AIMBOT_KEY then AimbotHolding = false end
 end)
 
-local CombatTab = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+--// UI TABS SETUP
+local CombatTab = Window:CreateTab("Combat", 4483345998)
+local VisualsTab = Window:CreateTab("Visuals", 4483345998)
+local WardrobeTab = Window:CreateTab("Wardrobe", 4483345998)
 
-CombatTab:AddToggle({
-    Name = "Enable Aimbot",
-    Default = false,
-    Callback = function(Value)
+-- Combat Features
+CombatTab:CreateToggle({
+   Name = "Enable Aimbot",
+   CurrentValue = false,
+   Callback = function(Value)
         AimbotEnabled = Value
         FovCircle.Visible = Value
-    end    
+   end,
 })
 
-CombatTab:AddToggle({
-    Name = "Hitbox Expander",
-    Default = false,
-    Callback = function(Value)
+CombatTab:CreateToggle({
+   Name = "Hitbox Expander",
+   CurrentValue = false,
+   Callback = function(Value)
         HitboxEnabled = Value
-    end    
+   end,
 })
 
-CombatTab:AddToggle({
-    Name = "Team Check",
-    Default = false,
-    Callback = function(Value)
+CombatTab:CreateToggle({
+   Name = "Team Check",
+   CurrentValue = false,
+   Callback = function(Value)
         TeamCheckEnabled = Value
-    end    
+   end,
 })
 
-local VisualsTab = Window:MakeTab({Name = "Visuals", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-
-VisualsTab:AddToggle({
-    Name = "Purple Highlight (ESP)",
-    Default = false,
-    Callback = function(Value)
+-- Visual Features
+VisualsTab:CreateToggle({
+   Name = "Purple Highlight (ESP)",
+   CurrentValue = false,
+   Callback = function(Value)
         setHighlights(Value)
-    end    
+   end,
 })
 
-local WardrobeTab = Window:MakeTab({Name = "Wardrobe", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-
-WardrobeTab:AddTextbox({
-    Name = "Target UserID",
-    Default = "1",
-    TextDisappear = false,
-    Callback = function(Value)
-        local num = tonumber(Value)
+-- Wardrobe Features
+WardrobeTab:CreateInput({
+   Name = "Target UserID",
+   PlaceholderText = "Masukkan ID Pemain...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+        local num = tonumber(Text)
         if num then TARGET_USER_ID = num end
-    end
+   end,
 })
 
-WardrobeTab:AddButton({
-    Name = "Apply Avatar (Local)",
-    Callback = function()
+WardrobeTab:CreateButton({
+   Name = "Apply Avatar & Animations",
+   Callback = function()
         spoofAvatar()
-    end
+   end,
 })
-
-OrionLib:Init()
