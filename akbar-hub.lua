@@ -1,5 +1,4 @@
-﻿--// ================= ANTI-CHEAT BYPASS (SPOOFING) ================= //--
-pcall(function()
+﻿pcall(function()
     if hookmetamethod then
         local oldIndex
         oldIndex = hookmetamethod(game, "__index", function(t, k)
@@ -13,7 +12,6 @@ pcall(function()
     end
 end)
 
---// ================= CONFIGURATION & SERVICES ================= //--
 local TARGET_PART = "HumanoidRootPart" 
 local CONFIG_HITBOX_SIZE = 4           
 local CONFIG_HITBOX_TRANSPARENCY = 0.7 
@@ -21,7 +19,7 @@ local CONFIG_HITBOX_TRANSPARENCY = 0.7
 local AIMBOT_KEY = Enum.UserInputType.MouseButton2 
 local AIMBOT_SMOOTHNESS = 0.25                     
 local AIMBOT_FOV_RADIUS = 150                      
-local TARGET_USER_ID = 1 -- Ganti dengan ID avatar target untuk Wardrobe
+local TARGET_USER_ID = 1
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -29,7 +27,6 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
---// STATES
 local HighlightEnabled = false
 local HitboxEnabled = false
 local TeamCheckEnabled = false
@@ -40,11 +37,9 @@ local CharacterConnections = {}
 local PlayerAddedConnection
 local HitboxConnection
 
---// ================= LOAD ORION UI LIBRARY ================= //--
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local OrionLib = loadstring(game:HttpGet("https://sandbox.orioncloud.tech/api/source", true))()
 local Window = OrionLib:MakeWindow({Name = "Akbar Hub", HidePremium = true, SaveConfig = false, IntroText = "Loading Akbar Hub..."})
 
---// ================= FOV DRAWING FOR AIMBOT ================= //--
 local FovCircle = Drawing.new("Circle")
 FovCircle.Visible = false
 FovCircle.Thickness = 1
@@ -53,9 +48,6 @@ FovCircle.Radius = AIMBOT_FOV_RADIUS
 FovCircle.Color = Color3.fromRGB(255, 255, 255)
 FovCircle.Filled = false
 
---// ================= CORE FUNCTIONS ================= //--
-
--- ESP / Highlight Functions
 local function createHighlight(character)
     if character:FindFirstChild("AdminHighlight") then return end
     local highlight = Instance.new("Highlight")
@@ -92,7 +84,6 @@ local function setHighlights(enabled)
     end
 end
 
--- Hitbox Functions
 local function resetHitbox(player)
     pcall(function()
         if player.Character and player.Character:FindFirstChild(TARGET_PART) then
@@ -133,7 +124,6 @@ local function updateHitboxes()
     end
 end
 
--- Aimbot Functions
 local function getClosestPlayerToCursor()
     local closestPlayer = nil
     local shortestDistance = math.huge
@@ -169,7 +159,6 @@ local function handleAimbot()
     end
 end
 
--- Wardrobe Function
 local function spoofAvatar()
     local char = LocalPlayer.Character
     if not char then return end
@@ -185,13 +174,11 @@ local function spoofAvatar()
     end)
 end
 
---// ================= COMBINED LOOP ================= //--
 HitboxConnection = RunService.RenderStepped:Connect(function()
     updateHitboxes()
     handleAimbot()
 end)
 
---// ================= AIMBOT INPUT CONTROLS ================= //--
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == AIMBOT_KEY then AimbotHolding = true end
@@ -201,9 +188,6 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == AIMBOT_KEY then AimbotHolding = false end
 end)
 
---// ================= UI TABS & ELEMENTS ================= //--
-
--- TAB 1: Combat (Aimbot & Hitbox)
 local CombatTab = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 CombatTab:AddToggle({
@@ -231,7 +215,6 @@ CombatTab:AddToggle({
     end    
 })
 
--- TAB 2: Visuals (ESP)
 local VisualsTab = Window:MakeTab({Name = "Visuals", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 VisualsTab:AddToggle({
@@ -242,7 +225,6 @@ VisualsTab:AddToggle({
     end    
 })
 
--- TAB 3: Wardrobe (Ubah Avatar)
 local WardrobeTab = Window:MakeTab({Name = "Wardrobe", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 WardrobeTab:AddTextbox({
@@ -262,5 +244,4 @@ WardrobeTab:AddButton({
     end
 })
 
--- Initialize Library
 OrionLib:Init()
